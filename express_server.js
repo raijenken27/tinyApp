@@ -1,29 +1,31 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // The server will listen on port 8080
+const PORT = 8080;
 
-// This is a simple in-memory database storing shortened URLs
+app.set("view engine", "ejs"); // Set EJS as the view engine
+
+// Define your urlDatabase
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-// Define a route that responds with "Hello!" when you access the root path "/"
-app.get("/", (req, res) => {
-  res.send("Hello!");
+// Route to render the URLs index page
+app.get("/urls", (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 
-// Define a route that responds with the JSON representation of the urlDatabase when you access "/urls.json"
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+// Route to render a single URL's details
+app.get("/urls/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+  const templateVars = { id, longURL };
+  res.render("urls_show", templateVars);
 });
 
-// Define a route that responds with an HTML message when you access "/hello"
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// Other routes...
 
-// Start the server and listen on the specified port
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
