@@ -14,13 +14,18 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <% if (username) { %>
+          <span class="nav-item nav-link">Logged in as: <%= username %></span>
+          <form method="POST" action="/logout" class="nav-item">
+            <button type="submit">Logout</button>
+          </form>
+        <% } else { %>
+          <form method="POST" action="/login" class="nav-item">
+            <input type="text" name="username" placeholder="Enter your username">
+            <button type="submit">Login</button>
+          </form>
+        <% } %>
       </div>
     </div>
-    <form action="/login" method="POST" class="form-inline">
-      <input type="text" name="username" class="form-control" placeholder="Username" />
-      <button type="submit" class="btn btn-light">Login</button>
-    </form>
   </nav>
 </header>
