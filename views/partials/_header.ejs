@@ -1,3 +1,4 @@
+<!-- _header.ejs -->
 <header>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
@@ -14,18 +15,22 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
-        <% if (username) { %>
-          <span class="nav-item nav-link">Logged in as: <%= username %></span>
-          <form method="POST" action="/logout" class="nav-item">
-            <button type="submit">Logout</button>
-          </form>
-        <% } else { %>
-          <form method="POST" action="/login" class="nav-item">
-            <input type="text" name="username" placeholder="Enter your username">
-            <button type="submit">Login</button>
-          </form>
-        <% } %>
+        <a class="nav-item nav-link" href="/urls">My URLs</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
+    <% if (user) { %>
+      <div class="navbar-right">
+        Logged in as: <%= user.email %>
+        <form method="POST" action="/logout" class="d-inline">
+          <button class="btn btn-link navbar-button" type="submit">Logout</button>
+        </form>
+      </div>
+    <% } else { %>
+      <div class="navbar-right">
+        <a href="/login" class="btn btn-link navbar-button">Login</a>
+        <a href="/register" class="btn btn-link navbar-button">Register</a>
+      </div>
+    <% } %>
   </nav>
 </header>
