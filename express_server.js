@@ -38,6 +38,10 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+app.get("/register", (req, res) => {
+  res.render("registration"); // Render the registration template
+});
+
 app.post("/login", (req, res) => {
   const { username } = req.body;
   if (username) {
