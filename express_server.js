@@ -42,10 +42,6 @@ const users = { // USER DATABASE
   }
 };
 
-
-
-// 📗 GET
-
 // HOME
 app.get('/', (req, res) => {
   res.redirect('login');
