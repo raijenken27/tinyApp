@@ -1,34 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-  </head>
-  <body>
-
-    <% include ./partials/_header %>
-
-    <% if (vars.user_id) { %>
-      <br />
-      <br />
-
-      <p>You are currently logged in already. Please log out using the button in the header before registering a new account.</p>
-
-      <h3>Reached this page by mistake? <a href="/urls">Click here</a> to return to your link library.</h3>
-
-    <% } else { %>
-
-      <h2>To use TinyApp, please register a new account:</h2>
-
-      <form action="/register" method="POST">
-        <label for="email">Email:</label>
-        <input id="email" type="email" name="email" placeholder="email@example.com" style="width: 300px">
-        <label for="password">Password:</label>
-        <input id="password" type="password" name="password" placeholder="Choose a secure password!" style="width: 300px">
-        <input type="submit" value="Register">
-      </form>
-
-      <h2>Already registered? <a href="/login">Click here to login.</a></h2>
-
-    <% } %>
-
-  </body>
+<html>
+<head>
+  <title>TinyApp - Register</title>
+</head>
+<body>
+  <h1>Register</h1>
+  <form method="POST" action="/register">
+    <label for="email">Email:</label>
+    <input type="text" name="email" id="email" required>
+    <br>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" required>
+    <br>
+    <button type="submit">Register</button>
+  </form>
+</body>
 </html>
