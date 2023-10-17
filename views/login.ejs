@@ -1,16 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/superhero/bootstrap.min.css"
+    integrity="sha384-HnTY+mLT0stQlOwD3wcAzSVAZbrBp141qwfR4WfTqVQKSgmcgzk+oP0ieIyrxiFO" crossorigin="anonymous">
+  <title>URL - TinyApp Example</title>
+</head>
+
+<body>
+
+  <!-- ejs header-->
   <header>
     <%- include('partials/_header') %>
   </header>
 
   <main style="margin: 5em;">
-    <h2 class="text-right" style="margin: 0 2em 2em 0" ;> log in to <strong>TinyApp</strong></h2>
+    <h2 class="text-right" style="margin: 0 2em 2em 0" ;> Log in to <strong>TinyApp</strong></h2>
     <form action="/login" method="POST">
       <div class="form-group">
         <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-          placeholder="Your email here...">
+          placeholder=" Type your Username...">
       </div>
       <div class="form-group">
-        <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Your password here...">
+        <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder=" Your Password...">
       </div>
       <button type="submit" class="btn btn-success">Submit</button>
     </form>

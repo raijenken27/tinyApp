@@ -10,19 +10,21 @@
 
 <body>
 
+  <!-- ejs header-->
   <header>
     <%- include('partials/_header') %>
   </header>
 
   <main style="margin: 5em;">
-    <h2 class="text-right" style="margin: 0 2em 2em 0" ;>log in to <strong>TinyApp</strong></h2>
-    <form action="/login" method="POST">
+    <h2 class="text-right" style="margin: 0 2em 2em 0" ;>Register to use <strong>TinyApp</strong> today </h2>
+    <form action="/register" method="POST">
       <div class="form-group">
         <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-          placeholder="Your email here...">
+          placeholder="Your Email Address...">
+        <small id="emailHelp" class="form-text text-muted">Choose a Valid Email Address (Don't Worry - Your Info is Safe with Us)</small>
       </div>
       <div class="form-group">
-        <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Your password here...">
+        <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Choose Your Password...">
       </div>
       <button type="submit" class="btn btn-success">Submit</button>
     </form>
