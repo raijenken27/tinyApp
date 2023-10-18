@@ -2,12 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 
-// Middleware and configurations
+// Middleware
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
-const bcrypt = require('bcrypt');
-app.use(bodyParser.urlencoded({ extended: true })); // Parses the form POST requests
+app.use(bodyParser.urlencoded({ extended: true })); // Formats the form POST requests
 app.set("view engine", "ejs");
 app.use(morgan('dev'));
 app.use(cookieSession({
@@ -15,9 +14,6 @@ app.use(cookieSession({
   keys: ['hamilton', 'biminibonboulash']
 }));
 app.use(express.static('public')); // Serve static files from the 'public' folder
-
-// Helper functions
-const { getUserByEmail, generateRandomString, getUserUrls } = require('./helpers/userHelpers');
 
 // URL and user databases
 const urlDatabase = {
@@ -29,7 +25,7 @@ const urlDatabase = {
 
 const users = {
   "raijenken27": {
-    id: "raijenken27", // Change userID to id
+    id: "raijenken27",
     email: "c.jerome.garcia@gmail.com",
     password: 'HelloWorld999'
   },
@@ -40,16 +36,25 @@ const users = {
   }
 };
 
-// Routes
+// Middleware function to check if the user is authenticated
+const requireLogin = (req, res, next) => {
+  const userID = req.session.user_id;
+  if (!userID) {
+  //  res.status(403).send('Please log in or register to use TinyApp!');
+    return res.redirect('/login');
+  }
 
-// Homepage - Redirect to login
+  next(); // Continue to the next middleware or route handler
+  
+};
+
+// Routes
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Register Page
 app.get('/register', (req, res) => {
-  const userID = req.session.user_id; // Should be req.session.user_id
+  const userID = req.session.user_id;
   if (!userID) {
     const templateVars = {
       user: null
@@ -60,7 +65,19 @@ app.get('/register', (req, res) => {
   }
 });
 
-// Login Page
+app.post('/register', (req, res)=> {
+  console.log(req.body);
+  const email =  req.body.email;
+  const password = req.body.password;
+  const id = 2134;
+  users[id] = {
+    id, email, password
+  };
+console.log(users);
+  res.redirect('/login');
+});
+
+
 app.get('/login', (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
@@ -73,42 +90,46 @@ app.get('/login', (req, res) => {
   }
 });
 
-// Create New URL Page
-app.get("/urls/new", (req, res) => {
-  const userID = req.session.user_id;
-  if (!userID) {
-    req.flash('error', 'Please log in or register to use TinyApp!');
-    res.redirect('/login');
-  } else {
-    const user = users[userID];
-    if (!user) {
-      req.flash('error', 'Please log in or register to use TinyApp!');
-      res.redirect('/login');
-    } else {
-      const templateVars = { user };
-      res.render("urls_new", templateVars);
+app.post('/login', (req, res)=> {
+  console.log(req.body);
+  const email =  req.body.email;
+  const password = req.body.password;
+
+  let user = null;
+  for (const uid in users) {
+    if (users[uid].email === email){
+    user = users[uid]  
     }
   }
+  if (!user){
+    return res.send('Invalid Credentials')
+  }
+  if (user.password!== password){
+    return res.send('Invalid Credentials')
+  }
+
+  req.session.user_id = user.id
+  res.redirect('/urls');
+
+ // res.status(200).send('Welcome to TinyApp!');
+
 });
 
-// User Dashboard
-app.get('/urls', (req, res) => {
+app.get('/urls', requireLogin, (req, res) => {
   const userID = req.session.user_id;
-  if (!userID) {
-    req.flash('error', 'Please log in or register to use TinyApp!');
-    res.redirect("/login");
-  } else {
-    const user = users[userID];
-    if (!user) {
-      req.flash('error', 'Please log in or register to use TinyApp!');
-      res.status(403).send('Please log in or register to use TinyApp!');
-    } else {
-      let urls = getUserUrls(urlDatabase, userID);
-      const templateVars = { urls, user };
-      res.render('urls_index', templateVars);
-    }
-  }
+  const user = users[userID];
+  let urls = urlDatabase; // Replace with your user-specific URLs
+  const templateVars = { urls, user };
+  res.render('urls_index', templateVars);
 });
+
+app.get('/urls/new', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const user = users[userID];
+  const templateVars = { user };
+  res.render('urls_new', templateVars);
+});
+
 // ... Other routes ...
 
 app.listen(PORT, () => {
