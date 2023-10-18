@@ -40,15 +40,63 @@ const users = {
 const requireLogin = (req, res, next) => {
   const userID = req.session.user_id;
   if (!userID) {
-  //  res.status(403).send('Please log in or register to use TinyApp!');
     return res.redirect('/login');
   }
 
   next(); // Continue to the next middleware or route handler
-  
 };
 
-// Routes
+// GET /urls/:shortURL
+app.get('/urls/:shortURL', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+
+  if (longURL && longURL.userID === userID) {
+    const templateVars = { shortURL, longURL, user: users[userID] };
+    res.render('urls_show', templateVars);
+  } else if (!longURL) {
+    res.status(404).send('URL not found');
+  } else {
+    res.status(403).send('Access denied');
+  }
+});
+
+// POST /urls/:shortURL/update
+app.post('/urls/:shortURL/update', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const shortURL = req.params.shortURL;
+  const updatedURL = req.body.updatedURL;
+
+  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID === userID) {
+    urlDatabase[shortURL].longURL = updatedURL;
+    res.redirect('/urls');
+  } else {
+    res.status(403).send('Access denied');
+  }
+});
+
+// POST /urls/:shortURL/delete
+app.post('/urls/:shortURL/delete', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const shortURL = req.params.shortURL;
+
+  if (urlDatabase[shortURL] && urlDatabase[shortURL].userID === userID) {
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  } else {
+    res.status(403).send('Access denied');
+  }
+});
+
+// POST /logout
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/login');
+});
+
+// ... Other routes ...
+
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
@@ -65,18 +113,17 @@ app.get('/register', (req, res) => {
   }
 });
 
-app.post('/register', (req, res)=> {
+app.post('/register', (req, res) => {
   console.log(req.body);
-  const email =  req.body.email;
+  const email = req.body.email;
   const password = req.body.password;
   const id = 2134;
   users[id] = {
     id, email, password
   };
-console.log(users);
+  console.log(users);
   res.redirect('/login');
 });
-
 
 app.get('/login', (req, res) => {
   const userID = req.session.user_id;
@@ -90,29 +137,26 @@ app.get('/login', (req, res) => {
   }
 });
 
-app.post('/login', (req, res)=> {
+app.post('/login', (req, res) => {
   console.log(req.body);
-  const email =  req.body.email;
+  const email = req.body.email;
   const password = req.body.password;
 
   let user = null;
   for (const uid in users) {
-    if (users[uid].email === email){
-    user = users[uid]  
+    if (users[uid].email === email) {
+      user = users[uid]
     }
   }
-  if (!user){
-    return res.send('Invalid Credentials')
+  if (!user) {
+    return res.send('Invalid Credentials');
   }
-  if (user.password!== password){
-    return res.send('Invalid Credentials')
+  if (user.password !== password) {
+    return res.send('Invalid Credentials');
   }
 
-  req.session.user_id = user.id
+  req.session.user_id = user.id;
   res.redirect('/urls');
-
- // res.status(200).send('Welcome to TinyApp!');
-
 });
 
 app.get('/urls', requireLogin, (req, res) => {
@@ -123,6 +167,13 @@ app.get('/urls', requireLogin, (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.get('/urls/news', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const user = users[userID];
+  const templateVars = { user };
+  res.render('urls_news', templateVars);
+});
+
 app.get('/urls/new', requireLogin, (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
@@ -130,7 +181,37 @@ app.get('/urls/new', requireLogin, (req, res) => {
   res.render('urls_new', templateVars);
 });
 
-// ... Other routes ...
+app.post('/urls', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const longURL = req.body.longURL;
+
+  if (!userID || !longURL) {
+    // Handle the case where userID or longURL is missing
+    return res.status(400).send("Invalid data. Please provide both a URL and be logged in.");
+  }
+
+  // Generate a new shortURL (you'll need a function for this)
+  const shortURL = generateShortURL();
+
+  // Save the new URL to the database
+  urlDatabase[shortURL] = {
+    longURL: longURL,
+    userID: userID,
+  };
+
+  res.redirect(`/urls/${shortURL}`);
+});
+
+
+app.get('/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const url = urlDatabase[shortURL];
+  if (url) {
+    res.redirect(url.longURL);
+  } else {
+    res.status(404).send('URL not found');
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`TinyApp is running on PORT: ${PORT}`);
