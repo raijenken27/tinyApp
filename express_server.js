@@ -6,21 +6,33 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
-app.use(bodyParser.urlencoded({ extended: true })); // Formats the form POST requests
+app.use(bodyParser.urlencoded({ extended: true });
 app.set("view engine", "ejs");
 app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
   keys: ['hamilton', 'biminibonboulash']
 }));
-app.use(express.static('public')); // Serve static files from the 'public' folder
+app.use(express.static('public');
 
 // URL and user databases
 const urlDatabase = {
-  b6UTxQ: { longURL: 'http://www.lighthouselabs.ca', userID: "raijenken27" },
-  i3BoGr: { longURL: 'https://www.google.ca', userID: "raijenken27" },
-  'a2f747': { longURL: 'https://www.nba.com', userID: "user2RandomID" },
-  '3f0037': { longURL: 'https://www.hubrisight.com', userID: "user2RandomID" }
+  b6UTxQ: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "raijenken27",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "raijenken27",
+  },
+  a2f747: {
+    longURL: "https://www.nba.com",
+    userID: "user2RandomID",
+  },
+  '3f0037': {
+    longURL: "https://www.hubrisight.com",
+    userID: "user2RandomID",
+  },
 };
 
 const users = {
@@ -43,7 +55,7 @@ const requireLogin = (req, res, next) => {
     return res.redirect('/login');
   }
 
-  next(); // Continue to the next middleware or route handler
+  next();
 };
 
 // GET /urls/:shortURL
@@ -145,7 +157,7 @@ app.post('/login', (req, res) => {
   let user = null;
   for (const uid in users) {
     if (users[uid].email === email) {
-      user = users[uid]
+      user = users[uid];
     }
   }
   if (!user) {
@@ -162,7 +174,7 @@ app.post('/login', (req, res) => {
 app.get('/urls', requireLogin, (req, res) => {
   const userID = req.session.user_id;
   const user = users[userID];
-  let urls = urlDatabase; // Replace with your user-specific URLs
+  let urls = urlDatabase;
   const templateVars = { urls, user };
   res.render('urls_index', templateVars);
 });
@@ -174,26 +186,15 @@ app.get('/urls/news', requireLogin, (req, res) => {
   res.render('urls_news', templateVars);
 });
 
-app.get('/urls/new', requireLogin, (req, res) => {
-  const userID = req.session.user_id;
-  const user = users[userID];
-  const templateVars = { user };
-  res.render('urls_new', templateVars);
-});
-
 app.post('/urls', requireLogin, (req, res) => {
   const userID = req.session.user_id;
   const longURL = req.body.longURL;
 
   if (!userID || !longURL) {
-    // Handle the case where userID or longURL is missing
     return res.status(400).send("Invalid data. Please provide both a URL and be logged in.");
   }
 
-  // Generate a new shortURL (you'll need a function for this)
   const shortURL = generateShortURL();
-
-  // Save the new URL to the database
   urlDatabase[shortURL] = {
     longURL: longURL,
     userID: userID,
@@ -201,7 +202,6 @@ app.post('/urls', requireLogin, (req, res) => {
 
   res.redirect(`/urls/${shortURL}`);
 });
-
 
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
@@ -211,6 +211,51 @@ app.get('/u/:shortURL', (req, res) => {
   } else {
     res.status(404).send('URL not found');
   }
+});
+
+// SUBMIT NEW LONG-URL - stores new URL in the database of the user and adds URL prefix if non-existent
+app.post("/urls", requireLogin, (req, res) => {
+  let { longURL } = req.body;
+
+  if (!longURL.startsWith('http')) {
+    longURL = `http://${longURL}`;
+  }
+
+  const userID = req.session.user_id;
+  const genShortURL = generateRandomString();
+  urlDatabase[genShortURL] = { longURL, userID };
+  res.redirect(`/urls/${genShortURL}`);
+});
+
+// DELETE EXISTING URL - owner of an existing URL can delete their stored URL
+app.post("/urls/:shortURL/delete", requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const { shortURL } = req.params;
+  if (userID !== urlDatabase[shortURL].userID) {
+    res.sendStatus(404);
+    return;
+  }
+
+  delete urlDatabase[shortURL];
+  res.redirect(`/urls`);
+});
+
+// EDIT EXISTING URL - owner of a URL can edit the URL. If no prefix for the URL is given, it adds the correct prefix.
+app.post("/urls/:shortURL/edit", requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  let { longURL } = req.body;
+  const { shortURL } = req.params;
+
+  if (userID !== urlDatabase[shortURL].userID) {
+    res.status(404).send('You do not have permission to edit this link');
+    return;
+  }
+  if (!longURL.startsWith('http')) {
+    longURL = `http://${longURL}`;
+  }
+
+  urlDatabase[shortURL] = { longURL, userID };
+  res.redirect(`/urls`);
 });
 
 app.listen(PORT, () => {

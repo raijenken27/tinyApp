@@ -8,7 +8,7 @@
     "test": "./node_modules/mocha/bin/mocha"
   },
   "keywords": [],
-  "author": "",
+  "author": "npm star",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
