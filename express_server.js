@@ -6,14 +6,14 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieSession = require('cookie-session');
-app.use(bodyParser.urlencoded({ extended: true });
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(morgan('dev'));
 app.use(cookieSession({
   name: 'session',
   keys: ['hamilton', 'biminibonboulash']
 }));
-app.use(express.static('public');
+app.use(express.static('public'));
 
 // URL and user databases
 const urlDatabase = {
@@ -57,6 +57,14 @@ const requireLogin = (req, res, next) => {
 
   next();
 };
+
+app.get('/urls/news', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const user = users[userID];
+  const templateVars = { user };
+  res.render('urls_news', templateVars);
+});
+
 
 // GET /urls/:shortURL
 app.get('/urls/:shortURL', requireLogin, (req, res) => {
@@ -105,6 +113,14 @@ app.post('/urls/:shortURL/delete', requireLogin, (req, res) => {
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
+});
+
+// Route for /urls/news
+app.get('/urls/news', requireLogin, (req, res) => {
+  const userID = req.session.user_id;
+  const user = users[userID];
+  const templateVars = { user };
+  res.render('urls_news', templateVars);
 });
 
 // ... Other routes ...
@@ -177,30 +193,6 @@ app.get('/urls', requireLogin, (req, res) => {
   let urls = urlDatabase;
   const templateVars = { urls, user };
   res.render('urls_index', templateVars);
-});
-
-app.get('/urls/news', requireLogin, (req, res) => {
-  const userID = req.session.user_id;
-  const user = users[userID];
-  const templateVars = { user };
-  res.render('urls_news', templateVars);
-});
-
-app.post('/urls', requireLogin, (req, res) => {
-  const userID = req.session.user_id;
-  const longURL = req.body.longURL;
-
-  if (!userID || !longURL) {
-    return res.status(400).send("Invalid data. Please provide both a URL and be logged in.");
-  }
-
-  const shortURL = generateShortURL();
-  urlDatabase[shortURL] = {
-    longURL: longURL,
-    userID: userID,
-  };
-
-  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get('/u/:shortURL', (req, res) => {
