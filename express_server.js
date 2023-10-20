@@ -123,8 +123,6 @@ app.get('/urls/news', requireLogin, (req, res) => {
   res.render('urls_news', templateVars);
 });
 
-// ... Other routes ...
-
 app.get('/', (req, res) => {
   res.redirect('/login');
 });
@@ -249,6 +247,33 @@ app.post("/urls/:shortURL/edit", requireLogin, (req, res) => {
   urlDatabase[shortURL] = { longURL, userID };
   res.redirect(`/urls`);
 });
+
+// ... (previous code)
+
+// Generate a random short URL
+function generateRandomString() {
+  let randomString = "";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < 6; i++) {
+    randomString += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return randomString;
+}
+
+// POST /urls - Create a new short URL (Requires authentication)
+app.post("/urls", requireLogin, (req, res) => {
+  const longURL = req.body.longURL;
+
+  let shortURL;
+  do {
+    shortURL = generateRandomString();
+  } while (urlDatabase[shortURL]);
+
+  urlDatabase[shortURL] = { longURL, userID: req.session.user_id };
+
+  res.redirect(`/urls/${shortURL}`);
+});
+
 
 app.listen(PORT, () => {
   console.log(`TinyApp is running on PORT: ${PORT}`);
