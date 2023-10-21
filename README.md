@@ -32,7 +32,8 @@ Manage your shortened URLs.
 Edit the destination of existing short URLs.
 Delete unwanted short URLs.
 View statistics for each short URL, including the number of visits.
-Usage
+
+## Usage
 Register for a TinyApp account or log in if you already have an account.
 After logging in, you can create a new short URL by providing the original URL.
 Your short URL will be displayed, and you can use it to access the original link.
