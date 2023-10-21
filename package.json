@@ -1,6 +1,6 @@
 {
-  "name": "tinyapp",
-  "version": "1.0.0",
+  "name": "@raijenken27/tinyapp",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
