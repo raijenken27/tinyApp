@@ -25,7 +25,7 @@ const {
 } = require('./helpers/userHelpers');
 
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 
 app.set('view engine', 'ejs');
 
@@ -36,7 +36,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['allowa', 'saiekdl', '3k3kd9w-gh', 'kd92-vnsl', '0dkdj1vlas'],
 
-  // Cookie Options
+  
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
