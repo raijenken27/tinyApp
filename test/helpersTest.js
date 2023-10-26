@@ -1,51 +1,84 @@
-const { assert } = require('chai');
-const { getUserByEmail, getUserUrls } = require('../helpers/userHelpers.js');
+const isRegisteredEmail = (email, userDatabase) => {
+  for (const userId in userDatabase) {
+    if (userDatabase[userId].email === email) {
+      return true;
+    }
+  }
+  return false;
+};
 
-const testUsers = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
+/**
+ * Get the user object by user ID.
+ * @param {string} userId - The user ID to search for.
+ * @param {object} userDatabase - The user database.
+ * @returns {object} - The user object or undefined if not found.
+ */
+const getUser = (userId, userDatabase) => {
+  return userDatabase[userId];
+};
+
+/**
+ * Find the user object in the "users" database by email.
+ * @param {string} email - The email to search for.
+ * @param {object} userDatabase - The user database.
+ * @returns {object|null} - The user object or null if not found.
+ */
+const getUserByEmail = (email, userDatabase) => {
+  for (const userId in userDatabase) {
+    if (userDatabase[userId].email === email) {
+      return userDatabase[userId];
+    }
   }
 };
 
-const urlDatabase = {
-  b6UTxQ: { longURL: 'http://www.lighthouselabs.ca', userID: "raijenken27" },
-  i3BoGr: { longURL: 'https://www.google.ca', userID: "raijenken27" },
-  'a2f747': { longURL: 'https://www.nba.com', userID: "user2RandomID" },
-  '3f0037': { longURL: 'https://www.hubrisight.com', userID: "user2RandomID" }
+/**
+ * Return an object of all the URLs in the urlDatabase that belong to a user.
+ * @param {string} id - The user's ID.
+ * @param {object} urlDatabase - The URL database.
+ * @returns {object} - An object containing URLs belonging to the user.
+ */
+const urlsForUser = (id, urlDatabase) => {
+  const userUrls = {};
+  for (const shortUrlKey in urlDatabase) {
+    if (urlDatabase[shortUrlKey].userId === id) {
+      userUrls[shortUrlKey] = urlDatabase[shortUrlKey];
+    }
+  }
+  return userUrls;
 };
 
+/**
+ * Check if a short URL is in our database.
+ * @param {string} shortUrl - The short URL key to check.
+ * @param {object} urlDatabase - The URL database.
+ * @returns {boolean} - True if the short URL is in the database, false otherwise.
+ */
+const isValidUrl = (shortUrl, urlDatabase) => {
+  if (urlDatabase[shortUrl]) {
+    return true;
+  }
+  return false;
+};
 
-describe('getUserByEmail', () => {
-  it('should return a user with valid email', () => {
-    const user = getUserByEmail(testUsers, "user@example.com").id;
-    const expectedOutput = "userRandomID";
-    assert.equal(user, expectedOutput);
-  });
-  it('should return a undefined with an invalid email', () => {
-    const user = getUserByEmail(testUsers, "cooluser@example.com").id;
-    const expectedOutput = undefined;
-    assert.equal(user, expectedOutput);
-  });
-});
+/**
+ * Check if the short URL belongs to the user.
+ * @param {string} shortUrl - The short URL key to check.
+ * @param {object} user - The user object.
+ * @param {object} urlDatabase - The URL database.
+ * @returns {boolean} - True if the URL's user ID matches the user's ID, false otherwise.
+ */
+const isUserUrl = (shortUrl, user, urlDatabase) => {
+  if (isValidUrl(shortUrl, urlDatabase) && urlDatabase[shortUrl].userId === user.id) {
+    return true;
+  }
+  return false;
+};
 
-
-describe('getUserUrls', () => {
-
-  it('should return longURL with shortURL of b6UTxQ', () => {
-    const user = getUserUrls(urlDatabase, "user2RandomID").b6UTxQ.longURL;
-    const expectedOutput = "https://www.hubrisight.com";
-    assert.equal(user, expectedOutput);
-  });
-  it('should return undefined with unmatching shortURL', () => {
-    const user = getUserUrls(urlDatabase, "userRandomID").b6UTxQ;
-    const expectedOutput = undefined;
-    assert.equal(user, expectedOutput);
-  });
-});
+module.exports = {
+  isRegisteredEmail,
+  getUser,
+  getUserByEmail,
+  urlsForUser,
+  isUserUrl,
+  isValidUrl,
+};

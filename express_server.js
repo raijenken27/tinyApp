@@ -22,7 +22,7 @@ const {
   urlsForUser,
   isUserUrl,
   isValidUrl,
-} = require('./helpers');
+} = require('./helpers/userHelpers');
 
 const app = express();
 const PORT = 8080; // default port 8080
